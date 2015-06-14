@@ -65,6 +65,18 @@ public class SecureSystem {
 					monitor.executeWrite(obj.getSubjectName(), obj.getObjectName(), obj.getValue());
 				}
 
+				else if(obj.equals(InstructionObject.CREATE)){
+					monitor.executeCreate(obj.getSubjectName(), obj.getObjectName(), obj.getValue());
+				}
+
+				else if(obj.equals(InstructionObject.DESTROY)){
+					monitor.executeDestroy(obj.getSubjectName(), obj.getObjectName(), obj.getValue());
+				}
+
+				else if(obj.equals(InstructionObject.RUN)){
+					// do something
+				}
+
 				printState(obj);
 			}
 		} catch(FileNotFoundException e){

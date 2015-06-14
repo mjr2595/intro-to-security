@@ -16,4 +16,8 @@ public enum SecurityLevel {
 	
 		return this.val >= other.val;
 	}
+
+	public boolean isEqual(SecurityLevel other){
+		return this.val == other.val;
+	}
 }

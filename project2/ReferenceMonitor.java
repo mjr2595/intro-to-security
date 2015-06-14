@@ -52,6 +52,27 @@ public class ReferenceMonitor {
 			manager.write(objectName, value);
 	}
 
+	public void executeCreate(String subjectName, String objectName) {
+		if (!objectLevelMap.containsKey(objectName)){
+			SecurityLevel subjectLevel = subjectLevelMap.get(subjectName.toUpperCase());
+			if (subjectLevel != null)
+				createNewObject(objectName, subjectLevel);
+		}
+	}
+
+	public void executeDestroy(String subjectName, String objectName){
+		if (objectLevelMap.containsKey(objectName)){
+			SecurityLevel subjectLevel = subjectLevelMap.get(subjectName.toUpperCase());
+			SecurityLevel objectLevel = objectLevelMap.get(objectName.toUpperCase());
+
+			if(subjectLevel == null || objectLevel == null)
+				return;
+
+			if(objectLevel.dominates(subjectLevel)){
+				objectLevelMap.remove(objectName);
+				manager.destroy(objectName);
+			}
+	}
 
 	public ObjectManager getObjectManager(){
 		return manager;
@@ -83,6 +104,15 @@ public class ReferenceMonitor {
 			}
 
 			return -1;
+		}
+
+		// Not sure if we even need these methods
+		public void create(String name){
+			return;
+		}
+
+		public void destroy(String name){
+			objectList.remove(name);
 		}
 
 		public ArrayList<SecureObject> getObjectList(){

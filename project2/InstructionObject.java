@@ -1,5 +1,5 @@
 public enum InstructionObject {
-	READ, WRITE, BAD;
+	READ, WRITE, BAD, CREATE, DESTROY, RUN;
 	private int value;
 	private String subjectName, objectName;
 
