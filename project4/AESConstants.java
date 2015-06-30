@@ -2,7 +2,7 @@ public interface AESConstants {
 
 	public static final int NUMBER_ROUNDS = 14; 
 
-	public static final byte KEY_COLUMNS = 8;   // 256 bits/32 bits
+	public static final int KEY_COLUMNS = 8;   // 256 bits/32 bits
 
 	public static final int BLOCK_COLUMNS = 4;  // 128 bits/32 bits
 	
