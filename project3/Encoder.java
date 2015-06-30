@@ -2,74 +2,187 @@ import java.util.Scanner;
 import java.util.Arrays;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.Integer;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 
 public class Encoder {
 	
 	private static String filename;
-	private static int numChars;
-	private static int[] alphabet;
-	private static double[] probabilities;
-	private static int totalNumLetters;
-	//private double entropy;
+	private static Scanner scanner;
+	private static Map<Character, Double> frequencyMap;
+	private static double[] freqArray;
+	private static Map<Character, Integer> charCountMap;
+	private static Map<Character, String> encryptionMap;
+	private static Map<String, Character> decryptionMap;
+	private static int total;
+	private static int k;
 
-	public static void main(String[] args){
+	// constant for alphabet
+	private static final String ALPH = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-		Encoder enc = new Encoder();
 
-		filename = "";
+	public Encoder(String filename, int k) throws FileNotFoundException {
+		this.filename = filename;
+		this.k = k;
+		total = 0;
+		frequencyMap = new HashMap<Character, Double>();
+		charCountMap = new HashMap<Character, Integer>();
+		
+		scanner = new Scanner(new File(filename));
+		
+		getFrequencies();
+		getEncryptionMap();
+		getDecryptionMap();
+		printResults();
+		createVolume(1);
+		decryptVolume(1);
+	}
 
-		if(args.length == 2){
-			filename = args[0];
-			numChars = Integer.parseInt(args[1]);
-		} else {
-			System.err.println("Your arguments are invalid.");
-			return;
+	private void getFrequencies() {
+		// total is sum of all numbers
+		int total = 0;
+		// count is number of lines
+		int count = 0;
+
+		// First go through file and fill count map
+		String currLine = "";
+		int currNumber = 0;
+		while (scanner.hasNextLine()) {
+			currLine = scanner.nextLine();
+			currNumber = Integer.parseInt(currLine);
+			charCountMap.put(ALPH.charAt(count), currNumber);
+			total += currNumber;
+			count++;
 		}
-		double entropy = 0;
-		entropy = enc.getEntropy(filename);
-		System.out.println("Entropy = " + entropy);
-	}
+		this.total = total;
 
-	public Encoder() {
-		alphabet = new int[26];
-		probabilities = new double[26];
-		totalNumLetters = 0;
-	}
+		// Now fill frequency map and array
+		freqArray = new double[count];
+		count = 0;
+		double freq = 0;
+		for (Character c : charCountMap.keySet()) {
+			freq = ((double)charCountMap.get(c) / total);
+			frequencyMap.put(c, freq);
+			if (count > 0)
+				freqArray[count] = freqArray[count - 1];
 
-	public static double getEntropy(String path) {
-		double entropy = 0;
-		File file = new File(path);	
-		try {
-			Scanner reader = new Scanner(file);
-
-			
-			int i = 0;
-			// read in frequency counts and keep track of totalNumLetters
-
-			while (reader.hasNextLine()) {
-				alphabet[i] = Integer.parseInt(reader.nextLine());
-				totalNumLetters += alphabet[i];
-				i++;
-			}
-			System.out.println("alphabet = " + Arrays.toString(alphabet));
-			System.out.println("total number of characters = " + totalNumLetters);
-			// go back and calculate each letter's probability
-			for (int j = 0; j < 27; j++) {
-				probabilities[j] = alphabet[j]/totalNumLetters;
-				entropy += probabilities[j]*log2(probabilities[j]);
-			}
-			
-			
-
-		} catch (FileNotFoundException e){
-			e.printStackTrace();
+			freqArray[count] += frequencyMap.get(c);
+			count++;
 		}
-		return entropy * -1;
 	}
 
-	public static double log2(double n) {
+	private void getEncryptionMap() {
+		encryptionMap = new HashMap<Character, String>();
+		encryptionMap = Huffman.getEncryptionCodes(frequencyMap);
+	}
+
+	private void getDecryptionMap() {
+		decryptionMap = new HashMap<String, Character>();
+		for(Map.Entry<Character, String> entry : encryptionMap.entrySet()){
+    		decryptionMap.put(entry.getValue(), entry.getKey());
+		}
+	}
+
+	private double getEntropy() {
+		double entropy = 0;
+		double currFreq = 0;
+		for (Character c : frequencyMap.keySet()) {
+			currFreq = frequencyMap.get(c);
+			entropy += currFreq * log_2(currFreq);
+		}
+		return -entropy;
+	}
+
+	// Helper method for computing log_2
+	private double log_2(double n) {
     	return (Math.log(n) / Math.log(2));
+	}
+
+	private void printResults() {
+		System.out.println("\n\n\t+---------+");
+		System.out.println("\t| RESULTS |");
+		System.out.println("\t+---------+\n");
+
+		// print each char and its encoding
+		for (Character c : charCountMap.keySet()) {
+			System.out.print("Character: " + c + ", Encoding: " + encryptionMap.get(c));
+			System.out.println(", Probability: " + charCountMap.get(c) + "/" + total);
+		}
+		// print entropy
+		System.out.println("________________________________________________\n");
+		System.out.println("Entropy = " + getEntropy() + "\n");
+	}
+
+	private void createVolume(int num) {
+		PrintWriter writer = null;
+		try {
+			writer = new PrintWriter("testText.enc" + num);
+			for (int i = 0; i < this.k; i++) {
+				writer.println(getRandomCharCode());
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (writer != null)
+				writer.close();
+		}
+	}
+	// helper method that generates a random number 0-1 then compares that to 
+	// the frequencies, if the random number is less than or equal to that frequency
+	// then use that charCode
+	private String getRandomCharCode() {
+		double rand = Math.random();
+		int index = 0;
+		int i = 0;
+		while (i < freqArray.length) {
+			if (rand < freqArray[i]) {
+				index = i;
+				i = freqArray.length;
+			}
+			i++;
+		}
+		return encryptionMap.get(ALPH.charAt(index));
+	}
+
+	private void decryptVolume(int num) {
+		int bits = 0;
+		Scanner scanner = null;
+		PrintWriter writer = null;
+		try {
+			scanner = new Scanner(new File("testText.enc" + num));
+			writer = new PrintWriter("testText.dec" + num);
+			String currLine = "";
+			while (scanner.hasNextLine()) {
+				currLine = scanner.nextLine();
+				writer.println(decryptionMap.get(currLine));
+				bits += currLine.length();
+			}
+			printEfficiency(bits, num);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (writer != null)
+				writer.close();
+		}
+	}
+
+	private void printEfficiency(int bits, int num) {
+		double bitsPerSymbol = bits / ((double)this.k);
+		System.out.println("Encryption " + num + " has " + bitsPerSymbol + " bits per symbol");
+		double ratio = (bitsPerSymbol / getEntropy()) * 10;
+		System.out.println("The percent difference from entropy is " + ratio);
+		System.out.println("\n");
+	}
+
+	public static void main(String[] args) throws FileNotFoundException {
+		int k = Integer.parseInt(args[1]);
+		String filename = args[0];
+		
+		Encoder encoder = new Encoder(filename, k);
 	}
 }
