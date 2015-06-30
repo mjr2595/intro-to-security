@@ -1,6 +1,12 @@
 public interface AESConstants {
+
+	public static final int NUMBER_ROUNDS = 14; 
+
+	public static final byte KEY_COLUMNS = 8;   // 256 bits/32 bits
+
+	public static final int BLOCK_COLUMNS = 4;  // 128 bits/32 bits
 	
-	private static final String[][] SBOX = 
+	public static final String[][] SBOX = 
 {
    { "63", "7C", "77", "7B", "F2", "6B", "6F", "C5", "30", "01", "67", "2B", "FE", "D7", "AB", "76" },
    { "CA", "82", "C9", "7D", "FA", "59", "47", "F0", "AD", "D4", "A2", "AF", "9C", "A4", "72", "C0" },
@@ -20,7 +26,7 @@ public interface AESConstants {
    { "8C", "A1", "89", "0D", "BF", "E6", "42", "68", "41", "99", "2D", "0F", "B0", "54", "BB", "16" }
 };
 
-	private static final String[][] INV_SBOX = 
+	public static final String[][] INV_SBOX = 
 {
    { "52", "09", "6A", "D5", "30", "36", "A5", "38", "BF", "40", "A3", "9E", "81", "F3", "D7", "FB" },
    { "7C", "E3", "39", "82", "9B", "2F", "FF", "87", "34", "8E", "43", "44", "C4", "DE", "E9", "CB" },
