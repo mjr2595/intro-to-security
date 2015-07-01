@@ -3,47 +3,22 @@ import java.util.*;
 
 
 public class Encryptor implements AESConstants {
-
-//	private static String keyFile;
-//	private static String filename;
 	private static Scanner keyScanner;
 	private static Scanner inputScanner;
+	private static char[] inputKey;
+	private static char[] expandedKey;
 	
 	public Encryptor(String keyFile, String inputFilename) throws FileNotFoundException {
-//		this.keyFile = keyFile;
-//		this.filename = filename;
-
 		keyScanner = new Scanner(new File(keyFile));
 		inputScanner = new Scanner(new File(inputFilename));
-		char[][] newState=subBytes(TEST_STATE);
+		//char[][] newState=subBytes(TEST_STATE);
 		print(TEST_STATE);
 		System.out.println();
-		shiftRows(TEST_STATE);
-		
-		
-		System.out.println(Arrays.deepToString(newState));
-		
-		
-		
-		//printKeyArray();
-		
-	}
+		print(shiftRows(TEST_STATE));
+		print(roundKey(TEST_STATE,shiftRows(TEST_STATE)));
+		}
 
-//	private char[] (byte key[4*Nk], word w[Nb*(Nr+1)], Nk){
-//		
-//		
-//	}
-//	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	//ex: value=f2 , nible0=f , nible1=2
 	public static char[][] subBytes(char[][] state){
 		char[][] newState=new char[BLOCK_SIZE][BLOCK_SIZE];
@@ -53,7 +28,6 @@ public class Encryptor implements AESConstants {
 				char value=state[row][col];
 				int nibble0=(value & 0xf0)>>4;
 				int nibble1=value & 0x0f;
-				
 				newState[row][col]=SBOX[nibble0][nibble1];
 				System.out.printf("Value: %h, Nibble0: %h, Nibble1: %h, NewState: %h\n",value,nibble0,nibble1,(newState[row][col]), (state[row][col]));
 			}
@@ -61,6 +35,19 @@ public class Encryptor implements AESConstants {
 		return newState;
 	}
 	
+	
+	//Assuming state and roundkey are same size... we need to pass in only the key for
+	//this specific round. (this can be changed if needed depending on how expanded key works.
+	public static char[][] roundKey(char[][] state, char[][] key){
+		char[][] newState=new char[BLOCK_SIZE][BLOCK_SIZE];
+		for(int row=0; row<BLOCK_SIZE; row++){
+			for (int col=0; col<BLOCK_SIZE; col++){
+		newState[row][col]=(char) (state[row][col] ^ key[row][col]);
+			}
+		}
+		
+		return newState;
+	}
 	
 	public static char[][] shiftRows(char[][] state){
 		char[][] newState=new char[BLOCK_SIZE][BLOCK_SIZE];
@@ -74,7 +61,7 @@ public class Encryptor implements AESConstants {
 			newState[row][col]=temp[col];
 			}
 			}
-		print(newState);
+	//	print(newState);
 		return newState;
 	}
 	
@@ -87,7 +74,7 @@ public class Encryptor implements AESConstants {
 			}
 			System.out.println();
 			}
-		System.out.println("--end print--");
+		System.out.println("--end print--\n");
 	}
 	
 	private void printKeyArray() {
