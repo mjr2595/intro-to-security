@@ -65,6 +65,61 @@ public class Encryptor implements AESConstants {
 		return newState;
 	}
 	
+	public static void expandKey() {
+		expandedKey = new char[4][60];
+		for(int row=0; row<BLOCK_SIZE; row++){
+			for (int col=0; col<KEY_COLUMNS; col++){
+				expandedKey[row][col] = inputKey[row][col];
+
+
+			}
+		}
+		int i = KEY_COLUMNS;
+		while (i < 60) {
+			if (i%8 == 0) {
+				rotWord(i);
+				subColBytes(i);
+				xor(i, i/KEY_COLUMNS);
+			} else {
+				xor(i, 0);
+			}
+		}
+	}
+
+	private static void xor(int col, int rcon) {
+		// every 8 cols xor with rcon
+		if (rcon !=0) {
+			expandedKey[0][col] ^= (expandedKey[0][col-4] ^ RCON[rcon]);
+			// equal to xoring zero
+			for (int row = 1; row < BLOCK_SIZE; i++) {
+				expandedKey[row][col] ^= (expandedKey[row][col-KEY_COLUMNS]);
+			}
+
+		} else {
+			for (int row = 0; row < BLOCK_SIZE; i++) {
+				expandedKey[row][col] ^= (expandedKey[row][col-KEY_COLUMNS]);
+			}
+		}
+	}
+
+	private static void subColBytes(int col) {
+		for (int row=0; row<BLOCK_SIZE; row++){
+			char value=state[row][col];
+			int nibble0=(value & 0xf0)>>4;
+			int nibble1=value & 0x0f;
+			expandedKey[row][col]=SBOX[nibble0][nibble1];
+			System.out.printf("[*subCOLBytes* Value: %h, Nibble0: %h, Nibble1: %h, NewState: %h\n",value,nibble0,nibble1,(newState[row][col]), (state[row][col]));
+		}
+	}
+
+
+	private static void rotWord(int colIndex) {
+		for (int row = 0; row < BLOCK_SIZE-1; row++) {
+			expandedKey[row][colIndex] = expandedKey[row+1][colIndex-1];
+		}
+		expandedKey[BLOCK_SIZE][colIndex] = expandedKey[0][colIndex-1];
+	}
+
 	private static void print(char[][] state){
 		System.out.println("--begin print--");
 		for(int row=0; row<BLOCK_SIZE; row++){
