@@ -22,20 +22,22 @@ public class Encryptor implements AESConstants {
 //		print(roundKey(TEST_STATE,shiftRows(TEST_STATE)));
 //		
 		//System.out.println((char) );
-		key();
+		getKey();
 		expandKey();
-		print(inputKey);
-		print(expandedKey);
+		printInputKey(inputKey);
+		//System.out.printf("%x \n",0x00);
+		printExpanded();
 		//System.out.println(Arrays.deepToString(expandedKey));
 		}
 
 	
 	
-	public static void key() throws FileNotFoundException{
+	public static void getKey() throws FileNotFoundException{
 		Scanner keyScanner =new Scanner(new File(keyFileName));
-		String key=null;
+		String key="";
 		while(keyScanner.hasNextLine()){
 			key=keyScanner.nextLine().toUpperCase();
+			//System.out.print(key);
 			if(validHex(key)){
 				break;
 			}
@@ -60,7 +62,7 @@ public class Encryptor implements AESConstants {
 					}
 					inputKey[row][col]=0x00;
 				}
-				i++;
+				i+=2;
 			}
 		}
 		
@@ -159,7 +161,7 @@ public class Encryptor implements AESConstants {
 
 		} else {
 			for (int row = 0; row < BLOCK_SIZE; row++) {
-				expandedKey[row][col] ^= (expandedKey[row][col-KEY_COLUMNS]);
+				expandedKey[row][col] = (char)((expandedKey[row][col-KEY_COLUMNS]) ^ (expandedKey[row][col-1]));
 			}
 		}
 	}
@@ -182,19 +184,35 @@ public class Encryptor implements AESConstants {
 		expandedKey[BLOCK_SIZE-1][colIndex] = expandedKey[0][colIndex-1];
 	}
 
-	private static void print(char[][] state){
-		System.out.println("--begin print--");
+	private static void printInputKey(char[][] state){
+		System.out.println("\nThe CipherKey is:");
 		for(int row=0; row<state.length; row++){
 			for (int col=0; col<state[row].length; col++){
-				
-				System.out.printf("%h",(state[row][col]));
+				char temp = state[row][col];
+				if (temp == 0)
+					System.out.printf("0%h ",temp);
+				else System.out.printf("%h ",temp);
 			}
-		//	System.out.println();
-			}
-		System.out.println("--end print--\n");
+			System.out.println();
+		}
 	}
 	
+	private void printExpanded() {
+		System.out.println("\nThe expanded key is:");
+		for(int row=0; row<expandedKey.length; row++){
+			for (int col=0; col<expandedKey[row].length; col++){
+				char temp = expandedKey[row][col];
+				if (temp == 0)
+					System.out.printf("0%h",temp);
+				else System.out.printf("%h",temp);
 
+				if (col != 0 && (col-3)%4 == 0)
+					System.out.print(" ");
+
+			}
+			System.out.println();
+		}
+	}
 	
 	private String[] inputToArray(String input) {
 		String[] array=new String[input.length()/2];
