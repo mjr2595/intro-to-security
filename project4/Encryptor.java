@@ -3,6 +3,7 @@ import java.util.*;
 
 
 public class Encryptor implements AESConstants {
+
 	private static String keyFileName;
 	private static String inputFilename;
 	private static char[][] inputKey;
@@ -137,12 +138,14 @@ public class Encryptor implements AESConstants {
 			}
 		}
 		int i = KEY_COLUMNS;
+		//int count = 1;
 		while (i < 60) {
-			if (i%8 == 0) {
-				//System.out.println(i);
+			if (i%4 == 0) {
+				System.out.println(i);
 				rotWord(i);
 				subColBytes(i);
 				xor(i, i/KEY_COLUMNS);
+				//count++;
 			} else {
 				xor(i, 0);
 			}
@@ -153,7 +156,7 @@ public class Encryptor implements AESConstants {
 	private static void xor(int col, int rcon) {
 		// every 8 cols xor with rcon
 		if (rcon !=0) {
-			expandedKey[0][col] ^= (expandedKey[0][col-4] ^ RCON[rcon]);
+			expandedKey[0][col] ^= (expandedKey[0][col-KEY_COLUMNS] ^ RCON[rcon]);
 			// equal to xoring zero
 			for (int row = 1; row < BLOCK_SIZE; row++) {
 				expandedKey[row][col] ^= (expandedKey[row][col-KEY_COLUMNS]);
@@ -231,4 +234,39 @@ public class Encryptor implements AESConstants {
 	    String binary = Integer.toBinaryString(hexInt);
 	    return binary;
 	}
+
+	// DR. YOUNG's CODE
+
+	private char mul (int a, char b) {
+		// int inda = (a < 0) ? (a + 256) : a;
+		// int indb = (b < 0) ? (b + 256) : b;
+
+		if ( (a != 0) && (b != 0) ) {
+		    int index = (LOG_TABLE[a] + LOG_TABLE[b]);
+		    char val = (char)(A_LOG_TABLE[ index % 255 ] );
+		    return val;
+		}
+		else {
+		    return 0;
+		
+	    } // mul
+
+	}
+	public void mixColumn (int c, char state[][]) {
+		// This is another alternate version of mixColumn, using the 
+		// logtables to do the computation.
+		
+		char a[] = new char[4];
+		
+		// note that a is just a copy of st[.][c]
+		for (int i = 0; i < 4; i++) 
+		    a[i] = state[i][c];
+		
+		// This is exactly the same as mixColumns1, if 
+		// the mul columns somehow match the b columns there.
+		state[0][c] = (char)(mul(2,a[0]) ^ a[2] ^ a[3] ^ mul(3,a[1]));
+		state[1][c] = (char)(mul(2,a[1]) ^ a[3] ^ a[0] ^ mul(3,a[2]));
+		state[2][c] = (char)(mul(2,a[2]) ^ a[0] ^ a[1] ^ mul(3,a[3]));
+		state[3][c] = (char)(mul(2,a[3]) ^ a[1] ^ a[2] ^ mul(3,a[0]));
+    } // mixColumn2
 }
