@@ -12,43 +12,93 @@ public class Encryptor implements AESConstants {
 	public Encryptor(String keyFileName, String inputFilename) throws FileNotFoundException {
 		
 		Encryptor.keyFileName=keyFileName;
-//		
-////		keyScanner = new Scanner(new File(keyFile));
-////		inputScanner = new Scanner(new File(inputFilename));
+		Encryptor.inputFilename=inputFilename;
 		expandedKey = new char[4][60];
-//		//char[][] newState=subBytes(TEST_STATE);
-//		print(TEST_STATE);
-//		System.out.println();
-//		print(shiftRows(TEST_STATE));
-//		print(roundKey(TEST_STATE,shiftRows(TEST_STATE)));
-//		
-		//System.out.println((char) );
 		getKey();
 		expandKey();
-		printInputKey(inputKey);
-		//System.out.printf("%x \n",0x00);
+		printInputKey(TEST_STATE);
+		printInputKey(run(TEST_STATE));
 		printExpanded();
-		//System.out.println(Arrays.deepToString(expandedKey));
+		input();
 		}
 
 	
+	private static void input() throws FileNotFoundException{
+		Scanner Scanner =new Scanner(new File(inputFilename));
+		PrintWriter output = new PrintWriter(inputFilename+".enc");
+		String line="";
+		while(Scanner.hasNextLine()){
+			
+			char[][] state=new char[BLOCK_SIZE][BLOCK_SIZE];
+			line=Scanner.nextLine().toUpperCase();
+			
+			if(validHex(line)){
+				
+				state=new char[BLOCK_SIZE][KEY_COLUMNS];
+				int i=0;
+				for(int row=0; row<BLOCK_SIZE; row++){
+					for (int col=0; col<BLOCK_SIZE; col++){
+						if(i<line.length()-1){
+							int hex=Integer.decode("0x"+line.charAt(i)+line.charAt(i+1));
+							state[row][col]=(char)hex;
+						} else {
+							if(i<line.length()){
+								int hex=Integer.decode("0x"+line.charAt(i)+"0");
+								state[row][col]=(char)hex;
+							}
+							state[row][col]=0x00;
+						}
+						i+=2;
+					}
+				}
+				//State is updated
+				output.write(output(run(state)));
+				output.write("\n");
+			}
+			
+		}
+		output.close();
+	}
 	
-	public static void getKey() throws FileNotFoundException{
+	private static String output(char[][] state) throws FileNotFoundException{
+		String out="";
+		for(int row=0; row<BLOCK_SIZE; row++){
+			for (int col=0; col<BLOCK_SIZE; col++){
+				out+=String.format("%h",state[row][col]);
+			}
+		}
+		return out;
+	}
+	
+	private static char[][] run(char[][] state){
+		state=roundKey(state,0);
+		int round=1;
+		while(round<NUMBER_ROUNDS){
+			state=subBytes(state);
+			state=shiftRows(state);
+			state=mixColumn(state);
+			round++;
+		}
+		state=subBytes(state);
+		state=shiftRows(state);
+		return state;
+	}
+	
+	
+	private static void getKey() throws FileNotFoundException{
 		Scanner keyScanner =new Scanner(new File(keyFileName));
 		String key="";
 		while(keyScanner.hasNextLine()){
 			key=keyScanner.nextLine().toUpperCase();
-			//System.out.print(key);
 			if(validHex(key)){
 				break;
 			}
 			else if(!keyScanner.hasNextLine()){
-				System.out.println("Bad key input");
 				return;
 			}
 		}
 		
-		//System.out.println(key);
+		
 		inputKey=new char[BLOCK_SIZE][KEY_COLUMNS];
 		int i=0;
 		for(int row=0; row<BLOCK_SIZE; row++){
@@ -91,7 +141,6 @@ public class Encryptor implements AESConstants {
 				int nibble0=(value & 0xf0)>>4;
 				int nibble1=value & 0x0f;
 				newState[row][col]=SBOX[nibble0][nibble1];
-				System.out.printf("Value: %h, Nibble0: %h, Nibble1: %h, NewState: %h\n",value,nibble0,nibble1,(newState[row][col]), (state[row][col]));
 			}
 		}
 		return newState;
@@ -100,11 +149,11 @@ public class Encryptor implements AESConstants {
 	
 	//Assuming state and roundkey are same size... we need to pass in only the key for
 	//this specific round. (this can be changed if needed depending on how expanded key works.
-	public static char[][] roundKey(char[][] state, char[][] key){
+	public static char[][] roundKey(char[][] state, int round){
 		char[][] newState=new char[BLOCK_SIZE][BLOCK_SIZE];
 		for(int row=0; row<BLOCK_SIZE; row++){
 			for (int col=0; col<BLOCK_SIZE; col++){
-		newState[row][col]=(char) (state[row][col] ^ key[row][col]);
+		newState[row][col]=(char) (state[row][col] ^ expandedKey[row][col+(round*4)]);
 			}
 		}
 		
@@ -131,21 +180,15 @@ public class Encryptor implements AESConstants {
 		
 		for(int row=0; row<BLOCK_SIZE; row++){
 			for (int col=0; col<KEY_COLUMNS; col++){
-				//System.out.println(row+" "+ col+ " "+inputKey[row][col]);
 				expandedKey[row][col] = inputKey[row][col];
-
-
 			}
 		}
 		int i = KEY_COLUMNS;
-		//int count = 1;
 		while (i < 60) {
 			if (i%4 == 0) {
-				System.out.println(i);
 				rotWord(i);
 				subColBytes(i);
 				xor(i, i/KEY_COLUMNS);
-				//count++;
 			} else {
 				xor(i, 0);
 			}
@@ -161,7 +204,6 @@ public class Encryptor implements AESConstants {
 			for (int row = 1; row < BLOCK_SIZE; row++) {
 				expandedKey[row][col] ^= (expandedKey[row][col-KEY_COLUMNS]);
 			}
-
 		} else {
 			for (int row = 0; row < BLOCK_SIZE; row++) {
 				expandedKey[row][col] = (char)((expandedKey[row][col-KEY_COLUMNS]) ^ (expandedKey[row][col-1]));
@@ -175,7 +217,6 @@ public class Encryptor implements AESConstants {
 			int nibble0=(value & 0xf0)>>4;
 			int nibble1=value & 0x0f;
 			expandedKey[row][col]=SBOX[nibble0][nibble1];
-			//System.out.printf("[*subCOLBytes* Value: %h, Nibble0: %h, Nibble1: %h, NewState: %h\n",value,nibble0,nibble1,(expandedKey[row][col]), (expandedKey[row][col]));
 		}
 	}
 
@@ -217,17 +258,17 @@ public class Encryptor implements AESConstants {
 		}
 	}
 	
-	private String[] inputToArray(String input) {
-		String[] array=new String[input.length()/2];
-		for(int i=0, z=0; i<input.length(); i+=2, z++){
-			array[z]=hexToBinary(""+input.charAt(i)+input.charAt(i+1));
-		}
-		
-		for(int i=0; i<array.length; i++){
-			System.out.println(array[i]);
-		}
-	 	return array;
-	}  
+//	private String[] inputToArray(String input) {
+//		String[] array=new String[input.length()/2];
+//		for(int i=0, z=0; i<input.length(); i+=2, z++){
+//			array[z]=hexToBinary(""+input.charAt(i)+input.charAt(i+1));
+//		}
+//		
+//		for(int i=0; i<array.length; i++){
+//			System.out.println(array[i]);
+//		}
+//	 	return array;
+//	}  
 	
 	private String hexToBinary(String hex) {
 	    int hexInt = Integer.parseInt(hex, 16);
@@ -237,7 +278,7 @@ public class Encryptor implements AESConstants {
 
 	// DR. YOUNG's CODE
 
-	private char mul (int a, char b) {
+	private static char mul (int a, char b) {
 		// int inda = (a < 0) ? (a + 256) : a;
 		// int indb = (b < 0) ? (b + 256) : b;
 
@@ -252,10 +293,10 @@ public class Encryptor implements AESConstants {
 	    } // mul
 
 	}
-	public void mixColumn (int c, char state[][]) {
+	private static char[][] mixColumn (char state[][]) {
 		// This is another alternate version of mixColumn, using the 
 		// logtables to do the computation.
-		
+		for(int c=0; c<BLOCK_SIZE; c++){
 		char a[] = new char[4];
 		
 		// note that a is just a copy of st[.][c]
@@ -269,4 +310,6 @@ public class Encryptor implements AESConstants {
 		state[2][c] = (char)(mul(2,a[2]) ^ a[0] ^ a[1] ^ mul(3,a[3]));
 		state[3][c] = (char)(mul(2,a[3]) ^ a[1] ^ a[2] ^ mul(3,a[0]));
     } // mixColumn2
-}
+	return state;
+	}
+	}

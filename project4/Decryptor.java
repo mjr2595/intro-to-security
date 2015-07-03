@@ -4,10 +4,11 @@ import java.util.*;
 
 public class Decryptor implements AESConstants {
 
-	private static String keyFileName;
-	private static String inputFilename;
-	private static char[][] inputKey;
-	private static char[][] expandedKey;
+		private static String keyFileName;
+		private static String inputFilename;
+		private static char[][] inputKey;
+		private static char[][] expandedKey;
+		
 	
 	public Decryptor(String keyFileName, String inputFilename) throws FileNotFoundException {
 		
@@ -38,7 +39,7 @@ public class Decryptor implements AESConstants {
 		String key="";
 		while(keyScanner.hasNextLine()){
 			key=keyScanner.nextLine().toUpperCase();
-			//System.out.print(key);
+			System.out.print(key);
 			if(validHex(key)){
 				break;
 			}
