@@ -16,9 +16,8 @@ public class Encryptor implements AESConstants {
 		expandedKey = new char[4][60];
 		getKey();
 		expandKey();
-		printInputKey(TEST_STATE);
-		printInputKey(run(TEST_STATE));
-		printExpanded();
+		
+		
 		input();
 		}
 
@@ -60,7 +59,7 @@ public class Encryptor implements AESConstants {
 		output.close();
 	}
 	
-	private static String output(char[][] state) throws FileNotFoundException{
+	private static String output(char[][] state){
 		String out="";
 		for(int row=0; row<BLOCK_SIZE; row++){
 			for (int col=0; col<BLOCK_SIZE; col++){
@@ -71,16 +70,49 @@ public class Encryptor implements AESConstants {
 	}
 	
 	private static char[][] run(char[][] state){
+		System.out.println("\nThe Plaintext is:");
+		print(state);
+		
+		
+		System.out.println("\nThe CipherKey is:");
+		print(inputKey);
+		printExpanded();
+		
+		int round=0;
 		state=roundKey(state,0);
-		int round=1;
+		System.out.println("After addRoundKey ("+round+"):");
+		System.out.println(output(state));
+		round++;
 		while(round<NUMBER_ROUNDS){
+			
 			state=subBytes(state);
+			System.out.println("After subBytes:");
+			System.out.println(output(state));
+			
 			state=shiftRows(state);
+			System.out.println("After shiftRows:");
+			System.out.println(output(state));
+			
 			state=mixColumn(state);
+			System.out.println("After mixColumns:");
+			System.out.println(output(state));
+			
+			state=roundKey(state,round);
+			System.out.println("After addRoundKey ("+round+"):");
+			System.out.println(output(state));
 			round++;
 		}
 		state=subBytes(state);
+		System.out.println("After subBytes:");
+		System.out.println(output(state));
+		
 		state=shiftRows(state);
+		System.out.println("After shiftRows:");
+		System.out.println(output(state));
+		
+		state=roundKey(state,round);
+		System.out.println("After addRoundKey ("+round+"):");
+		System.out.println(output(state));
 		return state;
 	}
 	
@@ -228,12 +260,12 @@ public class Encryptor implements AESConstants {
 		expandedKey[BLOCK_SIZE-1][colIndex] = expandedKey[0][colIndex-1];
 	}
 
-	private static void printInputKey(char[][] state){
-		System.out.println("\nThe CipherKey is:");
+	private static void print(char[][] state){
+		
 		for(int row=0; row<state.length; row++){
 			for (int col=0; col<state[row].length; col++){
 				char temp = state[row][col];
-				if (temp == 0)
+				if (temp<=0xf)
 					System.out.printf("0%h ",temp);
 				else System.out.printf("%h ",temp);
 			}
@@ -241,12 +273,12 @@ public class Encryptor implements AESConstants {
 		}
 	}
 	
-	private void printExpanded() {
+	private static void printExpanded() {
 		System.out.println("\nThe expanded key is:");
 		for(int row=0; row<expandedKey.length; row++){
 			for (int col=0; col<expandedKey[row].length; col++){
 				char temp = expandedKey[row][col];
-				if (temp == 0)
+				if (temp<=0xf)
 					System.out.printf("0%h",temp);
 				else System.out.printf("%h",temp);
 
@@ -256,6 +288,7 @@ public class Encryptor implements AESConstants {
 			}
 			System.out.println();
 		}
+		System.out.println();
 	}
 	
 //	private String[] inputToArray(String input) {
