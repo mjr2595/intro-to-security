@@ -336,25 +336,5 @@ for(int row=0; row<expandedKey.length; row++){
 }
 System.out.println();
 }	
-	
-//	private String[] inputToArray(String input) {
-//		String[] array=new String[input.length()/2];
-//		for(int i=0, z=0; i<input.length(); i+=2, z++){
-//			array[z]=hexToBinary(""+input.charAt(i)+input.charAt(i+1));
-//		}
-//		
-//		for(int i=0; i<array.length; i++){
-//			System.out.println(array[i]);
-//		}
-//	 	return array;
-//	}  
-	
-//	private String hexToBinary(String hex) {
-//	    int hexInt = Integer.parseInt(hex, 16);
-//	    String binary = Integer.toBinaryString(hexInt);
-//	    return binary;
-//	}
-//
-
 
 	}
