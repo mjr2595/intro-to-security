@@ -16,8 +16,6 @@ public class Encryptor implements AESConstants {
 		expandedKey = new char[4][60];
 		getKey();
 		expandKey();
-		
-		
 		input();
 		}
 
@@ -164,9 +162,6 @@ public class Encryptor implements AESConstants {
 	
 			// START DR. YOUNG's CODE///
 	private static char mul (int a, char b) {
-		// int inda = (a < 0) ? (a + 256) : a;
-		// int indb = (b < 0) ? (b + 256) : b;
-
 		if ( (a != 0) && (b != 0) ) {
 		    int index = (LOG_TABLE[a] + LOG_TABLE[b]);
 		    char val = (char)(A_LOG_TABLE[ index % 255 ] );
