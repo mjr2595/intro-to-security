@@ -50,7 +50,7 @@ public class Encryptor implements AESConstants {
 				}
 				//State is updated
 				output.write(output(run(state)));
-				output.write("\n");
+				if(Scanner.hasNextLine()) output.write("\n");
 			}
 			
 		}
@@ -61,6 +61,9 @@ public class Encryptor implements AESConstants {
 		String out="";
 		for(int row=0; row<BLOCK_SIZE; row++){
 			for (int col=0; col<BLOCK_SIZE; col++){
+				if (state[row][col]<=0xf){
+					out+=String.format("0%h",state[row][col]);
+				}else
 				out+=String.format("%h",state[row][col]);
 			}
 		}
