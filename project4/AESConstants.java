@@ -1,5 +1,9 @@
 public interface AESConstants {
 
+	public static final boolean DEBUG = true;
+
+	public static final boolean TIMING = false;
+
 	public static final int NUMBER_ROUNDS = 14; //Nr
 
 	public static final int KEY_COLUMNS = 8;   // 256 bits/32 bits //Nk

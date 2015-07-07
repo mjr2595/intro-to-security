@@ -49,7 +49,7 @@ public class Encryptor implements AESConstants {
 					}
 				}
 				//State is updated
-				output.write(output(run(state)));
+				output.write(output(run(state)).toUpperCase());
 				if(Scanner.hasNextLine()) output.write("\n");
 			}
 			
