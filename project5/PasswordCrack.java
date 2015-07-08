@@ -35,7 +35,7 @@ public class PasswordCrack {
 		//for (int i=0; i < numLevels; i++){
 		
 			
-			
+			//level 1 User
 			for(int i=0; i<userList.size(); i++){
 				User user=userList.get(i);
 				if(level1(user,user.getFirstName())){
@@ -54,8 +54,43 @@ public class PasswordCrack {
 				//System.out.println(i);
 			}
 			
+			//level 2 User
+			for(int i=0; i<userList.size(); i++){
+				User user=userList.get(i);
+				if(level2(user,user.getFirstName())){
+					i--;
+					userList.remove(user);
+				}
+				else if(level2(user,user.getLastName())){
+					i--;
+					userList.remove(user);
+				}
+				else if(level2(user,user.getUsername())){
+					i--;
+					userList.remove(user);
+				}
+				//System.out.println(user.getFirstName());
+				//System.out.println(i);
+			}
 			
-			
+			//level 3 User TODO  not working
+			for(int i=0; i<userList.size(); i++){
+				User user=userList.get(i);
+				if(level3(user,user.getFirstName())){
+					i--;
+					userList.remove(user);
+				}
+				else if(level3(user,user.getLastName())){
+					i--;
+					userList.remove(user);
+				}
+				else if(level3(user,user.getUsername())){
+					i--;
+					userList.remove(user);
+				}
+				//System.out.println(user.getFirstName());
+				//System.out.println(i);
+			}
 			
 			
 			
