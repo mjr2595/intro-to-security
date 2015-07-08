@@ -56,7 +56,7 @@ public class User {
 		return this.lastName;
 	}
 
-	public String getSeed() {
+	public String getSalt() {
 		return this.hash.substring(0,2);
 	}
 }
