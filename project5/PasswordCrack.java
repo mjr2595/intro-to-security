@@ -4,13 +4,12 @@ import java.io.*;
 
 public class PasswordCrack {
 
-
 	private static ArrayList<String> dictionaryList;
 	private static ArrayList<String> dictionaryListBuilder;
 	private static ArrayList<User> userList;
 	private static double beginTime;
-	private static final int numLevels = 3;
 	private static boolean addToList = true;
+	private static Map<Character, Character> leetMap;
 	
 	private PasswordCrack() {}
 	
@@ -28,153 +27,118 @@ public class PasswordCrack {
 
 	public static void crack(String dictionaryFile, String passwordFile) {
 		fillDictionaryArray(dictionaryFile);
-		// make user class
 		fillUserArray(passwordFile);
-		
-		
-		//NAMES
-		
-		//for (int i=0; i < numLevels; i++){
-		
+		fillLeetMap();
+		//NAMES		
 			
-			//level 1 User
-			for(int i=0; i<userList.size(); i++){
-				User user=userList.get(i);
-				if(level1(user,user.getFirstName())){
-					i--;
-					userList.remove(user);
-				}
-				else if(level1(user,user.getLastName())){
-					i--;
-					userList.remove(user);
-				}
-				else if(level1(user,user.getUsername())){
-					i--;
-					userList.remove(user);
-				}
-				//System.out.println(user.getFirstName());
-				//System.out.println(i);
+		//level 1 User
+		for(int i=0; i<userList.size(); i++){
+			User user=userList.get(i);
+			if(level1(user,user.getFirstName())){
+				i--;
+				userList.remove(user);
 			}
-			
-			//level 2 User
-			for(int i=0; i<userList.size(); i++){
-				User user=userList.get(i);
-				if(level2(user,user.getFirstName())){
-					i--;
-					userList.remove(user);
-				}
-				else if(level2(user,user.getLastName())){
-					i--;
-					userList.remove(user);
-				}
-				else if(level2(user,user.getUsername())){
-					i--;
-					userList.remove(user);
-				}
-				//System.out.println(user.getFirstName());
-				//System.out.println(i);
+			else if(level1(user,user.getLastName())){
+				i--;
+				userList.remove(user);
 			}
-			
-			//level 3
-			for(int i=0; i<userList.size(); i++){
-				User user=userList.get(i);
-				if(level3(user,user.getFirstName())){
-					i--;
-					userList.remove(user);
-				}
-				else if(level3(user,user.getLastName())){
-					i--;
-					userList.remove(user);
-				}
-				else if(level3(user,user.getUsername())){
-					i--;
-					userList.remove(user);
-				}
-				//System.out.println(user.getFirstName());
-				//System.out.println(i);
+			else if(level1(user,user.getUsername())){
+				i--;
+				userList.remove(user);
 			}
-			
-			
-			
-			
-			
-			
-		//}
-		
-		
-		
-		//dictionary (map(word, mangled state))
-		
-			for(int i=0; i<dictionaryList.size(); i++){
-					String word=dictionaryList.get(i);
-					for(int z=0; z<userList.size(); z++){
-						User user= userList.get(z);
-						if(level1(user,word)){
-							z--;
-							userList.remove(user);
-						}
-					}
-					
-					
-					for(int z=0; z<userList.size(); z++){
-						User user= userList.get(z);
-						if(level2(user,word)){
-							z--;
-							userList.remove(user);
-						}
-					}
-					
-					
-					for(int z=0; z<userList.size(); z++){
-						User user= userList.get(z);
-						if(level3(user,word)){
-							z--;
-							userList.remove(user);
-						}
-					}
-				
-			}
-			/////////
-			addToList=false;
-			for(int i=0; i<dictionaryListBuilder.size(); i++){
-				String word=dictionaryListBuilder.get(i);
-				dictionaryListBuilder.remove(i);
-				for(int z=0; z<userList.size(); z++){
-					User user= userList.get(z);
-					if(level1(user,word)){
-						z--;
-						userList.remove(user);
-					}
-				}
-				
-				
-				for(int z=0; z<userList.size(); z++){
-					User user= userList.get(z);
-					if(level2(user,word)){
-						z--;
-						userList.remove(user);
-					}
-				}
-				
-				
-				for(int z=0; z<userList.size(); z++){
-					User user= userList.get(z);
-					if(level3(user,word)){
-						z--;
-						userList.remove(user);
-					}
-				}
-			
 		}
+		
+		//level 2 User
+		for(int i=0; i<userList.size(); i++){
+			User user=userList.get(i);
+			if(level2(user,user.getFirstName())){
+				i--;
+				userList.remove(user);
+			}
+			else if(level2(user,user.getLastName())){
+				i--;
+				userList.remove(user);
+			}
+			else if(level2(user,user.getUsername())){
+				i--;
+				userList.remove(user);
+			}
+		}
+		
+		//level 3 User
+		for(int i=0; i<userList.size(); i++){
+			User user=userList.get(i);
+			if(level3(user,user.getFirstName())){
+				i--;
+				userList.remove(user);
+			}
+			else if(level3(user,user.getLastName())){
+				i--;
+				userList.remove(user);
+			}
+			else if(level3(user,user.getUsername())){
+				i--;
+				userList.remove(user);
+			}
+		}
+		
+		// DICTIONARY
+		for(int i=0; i<dictionaryList.size(); i++){
+			String word=dictionaryList.get(i);
+			for(int z=0; z<userList.size(); z++){
+				User user= userList.get(z);
+				if(level1(user,word)){
+					z--;
+					userList.remove(user);
+				}
+			}
 			
+			for(int z=0; z<userList.size(); z++){
+				User user= userList.get(z);
+				if(level2(user,word)){
+					z--;
+					userList.remove(user);
+				}
+			}
 			
+			for(int z=0; z<userList.size(); z++){
+				User user= userList.get(z);
+				if(level3(user,word)){
+					z--;
+					userList.remove(user);
+				}
+			}
+		}
+		// Don't add mangled words during last round
+		addToList=false;
+		
+		for(int i=0; i<dictionaryListBuilder.size(); i++){
+			String word=dictionaryListBuilder.get(i);
+			//dictionaryListBuilder.remove(i);
+			for(int z=0; z<userList.size(); z++){
+				User user= userList.get(z);
+				if(level1(user,word)){
+					z--;
+					userList.remove(user);
+				}
+			}
 			
-		// iterate over each user by 
-		// 	mangle name
-		//	mangle dictionary
-		// 	brute force
-		// remove user when password cracked
-
+			for(int z=0; z<userList.size(); z++){
+				User user= userList.get(z);
+				if(level2(user,word)){
+					z--;
+					userList.remove(user);
+				}
+			}
+	
+			for(int z=0; z<userList.size(); z++){
+				User user= userList.get(z);
+				if(level3(user,word)){
+					z--;
+					userList.remove(user);
+				}
+			}
+		}
 	}
 
 	private static void fillDictionaryArray(String filename) {
@@ -184,7 +148,10 @@ public class PasswordCrack {
 			Scanner scanner = new Scanner(new File(filename));
 			while (scanner.hasNextLine()) {
 				String word = scanner.nextLine();
-				dictionaryList.add(word);
+				if (word.length() > 8)
+					word = word.substring(0,8);
+				
+				dictionaryList.add(word.toLowerCase());
 			}
 		} catch (FileNotFoundException e){
 			e.printStackTrace();
@@ -198,21 +165,21 @@ public class PasswordCrack {
 			while (scanner.hasNextLine()) {
 				String line = scanner.nextLine();
 				User current = new User(line);
-
-//				 System.out.println(current.getUsername());
-//				 System.out.println(current.getHash());
-//				 System.out.println(current.getFirstName());
-//				 System.out.println(current.getLastName());
-
 				userList.add(current);
 			}
 		} catch (FileNotFoundException e){
 			e.printStackTrace();
 		}
 	}
-	
-	
-	
+
+	private static void fillLeetMap() {
+		leetMap = new HashMap<Character, Character>();
+		char letter[] = {'a', 'b', 'e', 'i', 'o', 's', 't', 'z'};
+		char symbol[] = {'@', '8', '3', '1', '0', '$', '7', '2'};
+		for (int i = 0; i < letter.length; i++) {
+			leetMap.put(letter[i], symbol[i]);
+		}
+	}
 	
 	private static boolean level1(User user, String word){
 		if(isCracked(user, dfirst(word))) return true;
@@ -230,6 +197,10 @@ public class PasswordCrack {
 		else if(isCracked(user, reflect1(word))) return true;
 		else if(isCracked(user, reflect2(word))) return true;
 		else if(isCracked(user, reverse(word))) return true;
+		else if(isCracked(user, replaceAllE(word))) return true;
+		else if(isCracked(user, replaceAllA(word))) return true;
+		else if(isCracked(user, replaceAllS(word))) return true;
+		else if(isCracked(user, leet(word))) return true;
 		else return false;
 	}
 	
@@ -244,40 +215,21 @@ public class PasswordCrack {
 	//will return true if the test password is the ACTUAL user's password 
 	private static boolean isCracked(User u, String password){
 		if((jcrypt.crypt(u.getSalt(), password)).equals(u.getHash())){
-			System.out.println(password);
-			System.out.printf("%.2fms\n",((double)System.currentTimeMillis()-beginTime));
+			System.out.println("Username: " + u.getUsername() + " Password: " + password);
+			System.out.printf("   Cracked in %.2fms\n",((double)System.currentTimeMillis()-beginTime));
 			return true;
 		}else
 			return false;
 		
 	}
-	
-	
-	
-	//FOR DEBUG ONLY... Delete before turning in.
-	private static void printHelper(){
-		String test ="hello";
-		System.out.println(prepend(test,'c'));
-		System.out.println(append(test,'c'));
-		System.out.println(dfirst(test));
-		System.out.println(dlast(test));
-		System.out.println(reverse(test));
-		System.out.println(duplicate(test));
-		System.out.println(reflect1(test));
-		System.out.println(reflect2(test));
-		System.out.println(capitalize(test));
-		System.out.println(ncapitalize(test));
-	}
-	
+
 	// adds character into word: level 3, will need to loop over every character
 	private static String prepend(String input, char letter){
-		if(addToList) dictionaryListBuilder.add(letter+input);
 		return letter+input;
 	}
 	
 	// adds character to end of word, will need to loop over every character
 	private static String append(String input, char letter){
-		if(addToList) dictionaryListBuilder.add(input+letter);
 		return input+letter;
 	}
 	
@@ -324,39 +276,58 @@ public class PasswordCrack {
 		return s;
 	}
 	
-	
 	private static String upper(String input){
-		return input.toUpperCase();	
+		String s = input.toUpperCase();
+		if(addToList) dictionaryListBuilder.add(s);
+		return s;	
 	}
 	
 	private static String lower(String input){
-		return input.toLowerCase();	
+		String s = input.toLowerCase();
+		if(addToList) dictionaryListBuilder.add(s);
+		return s;
 	}
 	
 	//only first letter capitalize
 	private static String capitalize(String input){
-		
-		return input.toUpperCase().charAt(0)+dfirst(input);	
+		String s = input.toUpperCase().charAt(0)+dfirst(input);	
+		if(addToList) dictionaryListBuilder.add(s);
+		return s;
 	}
 	
 	//first letter lowercase, rest of letters uppercase
 	private static String ncapitalize(String input){
-		
-		return input.toLowerCase().charAt(0)+dfirst(input).toUpperCase();	
+		String s = input.toLowerCase().charAt(0)+dfirst(input).toUpperCase();
+		if(addToList) dictionaryListBuilder.add(s);
+		return s;
 	}
-} 
-/*
-game plan:
 
-loop levels
+	private static String leet(String input) {
+		for (int i = 0; i < input.length(); i++) {
+			char currentChar = input.charAt(i);
+			if (leetMap.containsKey(currentChar)) {
+				 input = input.replace(currentChar, leetMap.get(currentChar));
+			}
+		}
+		if(addToList) dictionaryListBuilder.add(input);
+		return input;
+	}
+
+	private static String replaceAllE(String input) {
+		String s = input.replaceAll("e", "3");
+		if(addToList) dictionaryListBuilder.add(s);
+		return s;
+	}
 	
-	loop users
-		name
+	private static String replaceAllA(String input) {
+		String s = input.replaceAll("a", "@");
+		if(addToList) dictionaryListBuilder.add(s);
+		return s;
+	}
 
-	loop users
-		dictionary (map(word, mangled state))
-
-loop 8->1 (password length)
-	brute
-
-*/
+	private static String replaceAllS(String input) {
+		String s = input.replaceAll("s", "\\$");
+		if(addToList) dictionaryListBuilder.add(s);
+		return s;
+	}
+}

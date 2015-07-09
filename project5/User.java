@@ -10,35 +10,13 @@ public class User {
 	private String hash;
 
 	public User(String line) {
-		int i = 0;
-		while (line.charAt(i) != ':') {
-			i++;
-		}
-		this.username = line.substring(0, i);
-		i++;
-		int temp = i;
-		while (line.charAt(i) != ':') {
-			i++;
-		}
-		this.hash = line.substring(temp, i);
-		// skip this junk -> "519:519"
-		i += 9;
-		temp = i;
-		while (line.charAt(i) != ':') {
-			i++;
-		}
-		String fullName = line.substring(temp, i);
-		String[] split = fullName.split("\\s+");
-		this.firstName = split[0];
-		this.lastName = split[1];
+		String[] info = line.split(":");
+		this.username = info[0];
+		this.hash = info[1];
+		String[] fullName = info[4].split("\\s+");
+		this.firstName = fullName[0];
+		this.lastName = fullName[1];
 	}
-
-	// public User(String username, String first, String last, String hash) {
-	// 	this.username = username;
-	// 	this.firstName = first;
-	// 	this.lastName = last;
-	// 	this.hash = hash;
-	// }
 
 	public String getUsername() {
 		return this.username;
