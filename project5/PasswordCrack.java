@@ -6,9 +6,11 @@ public class PasswordCrack {
 
 
 	private static ArrayList<String> dictionaryList;
+	private static ArrayList<String> dictionaryListBuilder;
 	private static ArrayList<User> userList;
 	private static double beginTime;
 	private static final int numLevels = 3;
+	private static boolean addToList = true;
 	
 	private PasswordCrack() {}
 	
@@ -30,7 +32,7 @@ public class PasswordCrack {
 		fillUserArray(passwordFile);
 		
 		
-		
+		//NAMES
 		
 		//for (int i=0; i < numLevels; i++){
 		
@@ -73,7 +75,7 @@ public class PasswordCrack {
 				//System.out.println(i);
 			}
 			
-			//level 3 User TODO  not working
+			//level 3
 			for(int i=0; i<userList.size(); i++){
 				User user=userList.get(i);
 				if(level3(user,user.getFirstName())){
@@ -101,8 +103,72 @@ public class PasswordCrack {
 		
 		
 		
+		//dictionary (map(word, mangled state))
 		
-		
+			for(int i=0; i<dictionaryList.size(); i++){
+					String word=dictionaryList.get(i);
+					for(int z=0; z<userList.size(); z++){
+						User user= userList.get(z);
+						if(level1(user,word)){
+							z--;
+							userList.remove(user);
+						}
+					}
+					
+					
+					for(int z=0; z<userList.size(); z++){
+						User user= userList.get(z);
+						if(level2(user,word)){
+							z--;
+							userList.remove(user);
+						}
+					}
+					
+					
+					for(int z=0; z<userList.size(); z++){
+						User user= userList.get(z);
+						if(level3(user,word)){
+							z--;
+							userList.remove(user);
+						}
+					}
+				
+			}
+			/////////
+			addToList=false;
+			for(int i=0; i<dictionaryListBuilder.size(); i++){
+				String word=dictionaryListBuilder.get(i);
+				dictionaryListBuilder.remove(i);
+				for(int z=0; z<userList.size(); z++){
+					User user= userList.get(z);
+					if(level1(user,word)){
+						z--;
+						userList.remove(user);
+					}
+				}
+				
+				
+				for(int z=0; z<userList.size(); z++){
+					User user= userList.get(z);
+					if(level2(user,word)){
+						z--;
+						userList.remove(user);
+					}
+				}
+				
+				
+				for(int z=0; z<userList.size(); z++){
+					User user= userList.get(z);
+					if(level3(user,word)){
+						z--;
+						userList.remove(user);
+					}
+				}
+			
+		}
+			
+			
+			
 		// iterate over each user by 
 		// 	mangle name
 		//	mangle dictionary
@@ -113,6 +179,7 @@ public class PasswordCrack {
 
 	private static void fillDictionaryArray(String filename) {
 		dictionaryList = new ArrayList<String>();
+		dictionaryListBuilder = new ArrayList<String>();
 		try {
 			Scanner scanner = new Scanner(new File(filename));
 			while (scanner.hasNextLine()) {
@@ -144,6 +211,9 @@ public class PasswordCrack {
 		}
 	}
 	
+	
+	
+	
 	private static boolean level1(User user, String word){
 		if(isCracked(user, dfirst(word))) return true;
 		else if(isCracked(user, dlast(word))) return true;
@@ -157,13 +227,17 @@ public class PasswordCrack {
 		if(isCracked(user, (word))) return true;
 		else if(isCracked(user, capitalize(word))) return true;
 		else if(isCracked(user, ncapitalize(word))) return true;
-		else if(isCracked(user, reflect(word))) return true;
+		else if(isCracked(user, reflect1(word))) return true;
+		else if(isCracked(user, reflect2(word))) return true;
 		else if(isCracked(user, reverse(word))) return true;
 		else return false;
 	}
 	
 	private static boolean level3(User user, String word){
-		///WORK ON Prepend and append
+		for(int i=33; i<127; i++){
+			if(isCracked(user, prepend(word, (char)i))) return true;
+			else if(isCracked(user, append(word, (char)i))) return true;
+		}
 		return false;
 	}
 	
@@ -189,28 +263,33 @@ public class PasswordCrack {
 		System.out.println(dlast(test));
 		System.out.println(reverse(test));
 		System.out.println(duplicate(test));
-		System.out.println(reflect(test));
+		System.out.println(reflect1(test));
+		System.out.println(reflect2(test));
 		System.out.println(capitalize(test));
 		System.out.println(ncapitalize(test));
 	}
 	
 	// adds character into word: level 3, will need to loop over every character
 	private static String prepend(String input, char letter){
+		if(addToList) dictionaryListBuilder.add(letter+input);
 		return letter+input;
 	}
 	
 	// adds character to end of word, will need to loop over every character
 	private static String append(String input, char letter){
+		if(addToList) dictionaryListBuilder.add(input+letter);
 		return input+letter;
 	}
 	
 	// Deletes the first character from the word
 	private static String dfirst(String input){
+		if(addToList) dictionaryListBuilder.add(input.substring(1));
 		return input.substring(1);
 	}
 	
 	// Deletes the last character from the word
 	private static String dlast(String input){
+		if(addToList) dictionaryListBuilder.add(input.substring(0, input.length()-1));
 		return input.substring(0, input.length()-1);	
 	}
 		
@@ -223,17 +302,26 @@ public class PasswordCrack {
 	    	newArray[i] = newArray[newArray.length-i-1];
 	    	newArray[newArray.length-i-1] = letter;
 	    }
+	    if(addToList)   dictionaryListBuilder.add(String.valueOf(newArray));
 		return String.valueOf(newArray);	
 	}
 		
 	// duplicates string: hellohello
 	private static String duplicate(String input){
+		if(addToList) 	dictionaryListBuilder.add(input+input);
 		return input+input;	
 	}
 	
 	//reflects string: helloolleh
-	private static String reflect(String input){
-		return input+reverse(input);	
+	private static String reflect1(String input){
+		String s=input+reverse(input);
+		if(addToList) dictionaryListBuilder.add(s);
+		return s;	}
+	
+	private static String reflect2(String input){
+		String s=reverse(input)+input;
+		if(addToList) dictionaryListBuilder.add(s);
+		return s;
 	}
 	
 	
